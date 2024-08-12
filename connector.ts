@@ -12,7 +12,23 @@ export default class MyConnector implements Media.MediaConnector {
     options: Connector.QueryOptions,
     context: Connector.Dictionary
   ): Promise<Media.MediaPage> {
-    const resp = await this.runtime.fetch("https://picsum.photos/v2/list?page=1", {
+
+    // Set a default user limit
+    let limit = 30;
+
+    // Check if a specific limit is provided in the settings (context)
+    if (context.limit) {
+      // Convert the provided limit to a number
+      const parsedLimit = parseInt(context.limit.toString(), 10);
+
+      // Validate and set the user limit between 1 and 100
+      if (!isNaN(parsedLimit)) {
+        limit = Math.min(Math.max(parsedLimit, 1), 100);
+      }
+    }
+
+
+    const resp = await this.runtime.fetch(`https://picsum.photos/v2/list?page=1&limit=${limit}`, {
       method: "GET"
     });
 
@@ -64,19 +80,31 @@ export default class MyConnector implements Media.MediaConnector {
     // Check to see if we are a thumbnail in the UI or being used in another situation.
     switch (previewType) {
       case "thumbnail": {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/200`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "400/" : ""}200`, { method: "GET" });
         return picture.arrayBuffer;
       }
       default: {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/1000`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "2000/" : ""}1000`, { method: "GET" });
         return picture.arrayBuffer;
       }
     }
   }
 
   getConfigurationOptions(): Connector.ConnectorConfigValue[] | null {
-    return [];
+    return [
+      {
+        name: "limit",
+        displayName: "Number (1 to 100) of Images to Display",
+        type: "text"
+      },
+      {
+        name: "wide",
+        displayName: "Display images as rectangluar instead of square",
+        type: "boolean"
+      }
+    ];
   }
+
   getCapabilities(): Media.MediaConnectorCapabilities {
     return {
       query: true,
