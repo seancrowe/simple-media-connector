@@ -9,7 +9,7 @@
   },
   "config": {
     "type": "media",
-    "options": {},
+    "options": {"baseURL":null},
     "mappings": {}
   },
   "license": "MIT",

@@ -28,7 +28,7 @@ export default class MyConnector implements Media.MediaConnector {
     }
 
 
-    const resp = await this.runtime.fetch(`https://picsum.photos/v2/list?page=1&limit=${limit}`, {
+    const resp = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/v2/list?page=1&limit=${limit}`, {
       method: "GET"
     });
 
@@ -80,11 +80,11 @@ export default class MyConnector implements Media.MediaConnector {
     // Check to see if we are a thumbnail in the UI or being used in another situation.
     switch (previewType) {
       case "thumbnail": {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "400/" : ""}200`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/id/${id}/${(context.wide) ? "400/" : ""}200`, { method: "GET" });
         return picture.arrayBuffer;
       }
       default: {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "2000/" : ""}1000`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/id/${id}/${(context.wide) ? "2000/" : ""}1000`, { method: "GET" });
         return picture.arrayBuffer;
       }
     }
