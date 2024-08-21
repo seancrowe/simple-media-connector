@@ -12,6 +12,29 @@ export default class MyConnector implements Media.MediaConnector {
     options: Connector.QueryOptions,
     context: Connector.Dictionary
   ): Promise<Media.MediaPage> {
+
+    // When pageSize is 1, we know that query is called before download
+    if (options.pageSize == 1) {
+      return {
+        pageSize: options.pageSize, // Note: pageSize is not currently used by the UI
+
+        data: [{
+
+          id: options.filter[0],
+          name: "",
+          relativePath: "",
+          type: 0,
+          metaData: {}
+        }],
+
+        links: {
+          nextPage: "" // Pagination is ignored in this example
+        }
+      }
+    }
+
+    // If pageSize is bigger than 1, we do a normal query
+
     const resp = await this.runtime.fetch("https://picsum.photos/v2/list?page=1", {
       method: "GET"
     });
