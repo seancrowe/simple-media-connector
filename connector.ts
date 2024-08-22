@@ -13,8 +13,8 @@ export default class MyConnector implements Media.MediaConnector {
     context: Connector.Dictionary
   ): Promise<Media.MediaPage> {
 
-    // When pageSize is 1, we know that query is called before download
-    if (options.pageSize == 1) {
+    // When pageSize is 1 & collection is null, we know that query is called before download
+    if (options.pageSize == 1 && !options.collection) {
       return {
         pageSize: options.pageSize, // Note: pageSize is not currently used by the UI
 
