@@ -13,6 +13,28 @@ export default class MyConnector implements Media.MediaConnector {
     context: Connector.Dictionary
   ): Promise<Media.MediaPage> {
 
+    // When pageSize is 1 & collection is null, we know that query is called before download
+    if (options.pageSize == 1 && !options.collection) {
+      return {
+        pageSize: options.pageSize, // Note: pageSize is not currently used by the UI
+
+        data: [{
+
+          id: options.filter[0],
+          name: "",
+          relativePath: "",
+          type: 0,
+          metaData: {}
+        }],
+
+        links: {
+          nextPage: "" // Pagination is ignored in this example
+        }
+      }
+    }
+
+    // If pageSize is bigger than 1, we do a normal query
+
     // Set a default user limit
     let limit = 30;
 
@@ -28,7 +50,7 @@ export default class MyConnector implements Media.MediaConnector {
     }
 
 
-    const resp = await this.runtime.fetch(`https://picsum.photos/v2/list?page=1&limit=${limit}`, {
+    const resp = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/v2/list?page=1&limit=${limit}`, {
       method: "GET"
     });
 
@@ -80,11 +102,11 @@ export default class MyConnector implements Media.MediaConnector {
     // Check to see if we are a thumbnail in the UI or being used in another situation.
     switch (previewType) {
       case "thumbnail": {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "400/" : ""}200`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/id/${id}/${(context.wide) ? "400/" : ""}200`, { method: "GET" });
         return picture.arrayBuffer;
       }
       default: {
-        const picture = await this.runtime.fetch(`https://picsum.photos/id/${id}/${(context.wide) ? "2000/" : ""}1000`, { method: "GET" });
+        const picture = await this.runtime.fetch(`https://${this.runtime.options["baseURL"]}/id/${id}/${(context.wide) ? "2000/" : ""}1000`, { method: "GET" });
         return picture.arrayBuffer;
       }
     }
